@@ -1,6 +1,9 @@
+import sys
 from collections import deque
 import numpy as np
 import math
+
+sys.path.append('carla910/PythonAPI/carla/dist/carla-0.9.10-py3.7-linux-x86_64.egg')
 import carla
 
 class PIDLongitudinalController:
@@ -39,13 +42,13 @@ class PIDLongitudinalController:
         else:
             _de = 0.0
             _ie = 0.0
-        
+
         if enable_brake:
             throttle_min_clip = -1.0
         else:
             throttle_min_clip = 0.0
-        
-        return np.clip((self._K_P * _e) + (self._K_D * _de / self._dt) + (self._K_I * _ie * self._dt), 
+
+        return np.clip((self._K_P * _e) + (self._K_D * _de / self._dt) + (self._K_I * _ie * self._dt),
             throttle_min_clip, 1.0)
 
 class PIDLateralController:
@@ -82,7 +85,7 @@ class PIDLateralController:
                           v_begin.x, target_transform.location.y -
                           v_begin.y, 0.0])
         _dot = math.acos(np.clip(np.dot(w_vec, v_vec) /
-                                 (np.linalg.norm(w_vec) * np.linalg.norm(v_vec)), -1.0, 1.0))
+            (np.linalg.norm(w_vec) * np.linalg.norm(v_vec)), -1.0, 1.0))
 
         _cross = np.cross(v_vec, w_vec)
         if _cross[2] < 0:
@@ -104,7 +107,7 @@ class PIDController:
     def __init__(self, K_P=1.0, K_D=0.0, K_I=0.0, dt=0.03):
         self.longitudinal = PIDLongitudinalController(K_P, K_D, K_I, dt)
         self.lateral = PIDLateralController(K_P, K_D, K_I, dt)
-    
+
     def pid_control(self, target_transform, vehicle_transform, target_speed, current_speed, enable_brake=False):
         """ Retrun [steer, throttle] pair
         """
@@ -123,10 +126,10 @@ if __name__ == '__main__':
     pid_controller = PIDController(**kargs_dict)
     curr_loc = carla.Location(0, 0, 0)
     curr_rot = carla.Rotation(0, 0, 0)
-    curr_speed = 0.
+    curr_speed = 15.
     curr_tsfm = carla.Transform(curr_loc, curr_rot)
 
-    target_loc = carla.Location(0, 0, 10)
+    target_loc = carla.Location(2, 5, 0)
     target_rot = carla.Rotation(0, 0, 0)
     target_speed = 20.
     target_tsfm = carla.Transform(target_loc, target_rot)
